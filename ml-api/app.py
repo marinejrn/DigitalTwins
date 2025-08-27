@@ -3,7 +3,11 @@ from flask import Flask, request, jsonify, render_template
 from utils import project_and_cluster_with_patient,compute_js_divergence, estimate_survival
 from flask_cors import CORS 
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder=os.path.join(os.path.dirname(__file__), 'static'),
+    template_folder=os.path.join(os.path.dirname(__file__), 'templates')
+)
 CORS(app)
 @app.route("/")
 def index():
@@ -37,5 +41,9 @@ def predict():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Render injecte le port ici
     app.run(host="0.0.0.0", port=port, debug=False)
+    import os
+
+
+
 
 
