@@ -141,29 +141,29 @@
 <body>
 <div class="ecran">
   <div class="sidebar dashboard">
-    <h2>Profil patiente</h2>
+    <h2>Patient Profile</h2>
 
     <form id="form">
-      <div class="form-group"><label>Âge:</label> <input name="age_at_diagnosis" /></div>
+      <div class="form-group"><label>Age:</label> <input name="age_at_diagnosis" /></div>
       <div class="form-group"><label>BMI:</label> <input name="bmi" /></div>
       <div class="form-row">
-        <label>Comorbidités:</label>
+        <label>Comorbidities:</label>
         <div class="radio-group">
-          <label><input type="radio" name="comorbidities" value="1" /> Oui</label>
-          <label><input type="radio" name="comorbidities" value="0" checked /> Non</label>
+          <label><input type="radio" name="comorbidities" value="1" /> Yes</label>
+          <label><input type="radio" name="comorbidities" value="0" checked /> No</label>
         </div>
       </div>
 
       <div class="form-row">
-        <label>Hormonal:</label>
+        <label>Hormonal status:</label>
         <div class="radio-group">
           <label><input type="radio" name="hormonal" value="1" /> ER/PR +</label>
           <label><input type="radio" name="hormonal" value="0" checked /> TNBC</label>
         </div>
       </div>
-      <div class="form-group"><label>Hémoglobine:</label> <input name="hemoglobin" placeholder="g/L" /></div>
+      <div class="form-group"><label>Hemoglobin:</label> <input name="hemoglobin" placeholder="g/L" /></div>
       <div class="form-group"><label>Lymphocytes:</label> <input name="lymphocyte_count" /></div>
-      <div class="form-group"><label>Ganglions:</label> <input name="lymph_nodes_involved" /></div>
+      <div class="form-group"><label>Lymph nodes:</label> <input name="lymph_nodes_involved" /></div>
       <div class="form-group"><label>Tum. size:</label> <input name="tumor_size" /></div>
       <div class="form-group"><label>Tum. grade:</label> <input name="tumor_grade" /></div>
 
@@ -205,22 +205,22 @@ form.onsubmit = async (e) => {
   if (data.js_pvalue < 0.25) {
     warning = `
       <div class="alert">
-        ⚠️ Les groupes comparés sont très éloignés (p = ${data.js_pvalue}). Le bénéfice estimé est à interpréter avec prudence.
+        ⚠️The groups compared are very far apart (p = ${data.js_pvalue}). The estimated benefit should be interpreted with caution.
       </div>`;
   }
   if (data.js_pvalue > 0.25) {
     warning = `
       <div class="info">
-        Aucune différence significative entre les groupes comparés (p = ${data.js_pvalue})
+        No significant difference between the groups compared (p = ${data.js_pvalue})
       </div>`;
   }
 
   output.innerHTML = `
-    <h2>Résultat pour la patiente</h2>
-    <p><strong>Cluster :</strong> ${data.cluster}</p>
-    <p><strong>Survie avec chimiothérapie :</strong> ${Math.round(data.survival_chemo * 100)}%</p>
-    <p><strong>Survie sans chimiothérapie :</strong> ${Math.round(data.survival_no_chemo * 100)}%</p>
-    ${warning}
+    <h2>Patient Outcome</h2>
+<p><strong>Cluster:</strong> ${data.cluster}</p>
+<p><strong>Survival with chemotherapy:</strong> ${Math.round(data.survival_chemo * 100)}%</p>
+<p><strong>Survival without chemotherapy:</strong> ${Math.round(data.survival_no_chemo * 100)}%</p>
+${warning}
   `;
     output.style.display = "block";
 
