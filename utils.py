@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 from sklearn.cluster import MeanShift
@@ -6,7 +7,7 @@ from sklearn.metrics import pairwise_distances
 from scipy.spatial.distance import jensenshannon
 
 def load_data_from_csv():
-    df = pd.read_csv("ml-api\model\df.csv")
+    df = pd.read_csv('model\df.csv')
     return df
 
 def project_and_cluster_with_patient(patient_dict):
