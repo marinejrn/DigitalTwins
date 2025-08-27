@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from utils import project_and_cluster_with_patient,compute_js_divergence, estimate_survival
 from flask_cors import CORS 
@@ -32,5 +33,7 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Render injecte le port ici
+    app.run(host="0.0.0.0", port=port, debug=False)
 
 
