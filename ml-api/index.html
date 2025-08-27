@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Digital Twin - Test</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Funnel Display", sans-serif;
+      background-image:url('ml-api\background.webp');
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dashboard {
+      background: #f6f9fca0;
+      border:1px solid white;
+      border-radius: 14px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .ecran{
+      display: flex;
+      gap:20px;
+      width: 95%;
+      max-width: 1400px;
+      height: 85%;
+    }
+    .sidebar {
+      width: 350px;
+      padding:30px;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color:black;
+    }
+
+    .form-group {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+    .form-row{
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+    .form-group input {
+      width: 80px;
+      padding: 5px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+    }
+
+    .form-section h3 {
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #444;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      position: relative;
+    }
+
+    .card {
+      width: 100%;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .card p {
+      margin: 6px 0;
+      font-size: 15px;
+    }
+
+    .card strong {
+      color: #333;
+    }
+
+    .btn {
+      background: #0d6efd;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      background-color: #0b5cd7;
+    }
+    .loading {
+      font-style: italic;
+      color: gray;
+    }
+    .alert {
+      background-color: #fff8e1;
+      padding: 10px;
+      margin-top: 10px;
+      border-left: 5px solid #f9a825;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .info{
+      background-color: #f2fdf0;
+      padding: 10px;
+      margin-top: 10px;
+      border-left: 5px solid #33cb54;
+      border-radius: 4px;
+      width: 40%;
+      font-size: 14px;
+
+    }
+  </style>
+</head>
+<body>
+<div class="ecran">
+  <div class="sidebar dashboard">
+    <h2>Profil patiente</h2>
+
+    <form id="form">
+      <div class="form-group"><label>Âge:</label> <input name="age_at_diagnosis" /></div>
+      <div class="form-group"><label>BMI:</label> <input name="bmi" /></div>
+      <div class="form-row">
+        <label>Comorbidités:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="comorbidities" value="1" /> Oui</label>
+          <label><input type="radio" name="comorbidities" value="0" checked /> Non</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Hormonal:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="hormonal" value="1" /> ER/PR +</label>
+          <label><input type="radio" name="hormonal" value="0" checked /> TNBC</label>
+        </div>
+      </div>
+      <div class="form-group"><label>Hémoglobine:</label> <input name="hemoglobin" placeholder="g/L" /></div>
+      <div class="form-group"><label>Lymphocytes:</label> <input name="lymphocyte_count" /></div>
+      <div class="form-group"><label>Ganglions:</label> <input name="lymph_nodes_involved" /></div>
+      <div class="form-group"><label>Tum. size:</label> <input name="tumor_size" /></div>
+      <div class="form-group"><label>Tum. grade:</label> <input name="tumor_grade" /></div>
+
+      <button class="btn" type="submit">Résultats</button>
+      <div id="loading" class="loading" style="display: none;">Analyse en cours...</div>
+    </form>
+  </div>
+  <div class="content dashboard">
+    <div class="card" id="output" style="display:none;"></div>
+    <div id="plot3d" style="width: 100%; height: 320px; margin-top: 2px;"></div>
+  </div>
+</div>
+
+<script>
+form.onsubmit = async (e) => {
+  e.preventDefault();
+  output.style.display = "none";
+  loading.style.display = "block";
+
+  const formData = new FormData(form);
+  const json = Object.fromEntries(formData.entries());
+  for (let key in json) json[key] = parseFloat(json[key]);
+
+  const res = await fetch("http://127.0.0.1:5000/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(json),
+  });
+
+  const data = await res.json();
+  loading.style.display = "none";
+
+  const delta = Math.abs(data.survival_chemo - data.survival_no_chemo);
+  let confiance = "faible";
+  if (delta > 0.1) confiance = "moyenne";
+  if (delta > 0.2) confiance = "élevée";
+
+  let warning = "";
+  if (data.js_pvalue < 0.25) {
+    warning = `
+      <div class="alert">
+        ⚠️ Les groupes comparés sont très éloignés (p = ${data.js_pvalue}). Le bénéfice estimé est à interpréter avec prudence.
+      </div>`;
+  }
+  if (data.js_pvalue > 0.25) {
+    warning = `
+      <div class="info">
+        Aucune différence significative entre les groupes comparés (p = ${data.js_pvalue})
+      </div>`;
+  }
+
+  output.innerHTML = `
+    <h2>Résultat pour la patiente</h2>
+    <p><strong>Cluster :</strong> ${data.cluster}</p>
+    <p><strong>Survie avec chimiothérapie :</strong> ${Math.round(data.survival_chemo * 100)}%</p>
+    <p><strong>Survie sans chimiothérapie :</strong> ${Math.round(data.survival_no_chemo * 100)}%</p>
+    ${warning}
+  `;
+    output.style.display = "block";
+
+  Plotly.newPlot('plot3d', [
+    {
+      x: data.manifold.map(p => p[0]),
+      y: data.manifold.map(p => p[1]),
+      z: data.manifold.map(p => p[2]),
+      mode: 'markers',
+      type: 'scatter3d',
+      marker: {
+        size: 3,
+        color: data.clusters,
+        colorscale: 'Portland',
+        opacity: 0.7
+      },
+      name: 'Patientes'
+    },
+    {
+      x: [data.coordinates_3d[0]],
+      y: [data.coordinates_3d[1]],
+      z: [data.coordinates_3d[2]],
+      mode: 'markers',
+      type: 'scatter3d',
+      marker: {
+        size: 8,
+        color: 'black',
+        symbol: 'star'
+      },
+      name: 'Nouvelle patiente'
+    }
+  ], {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: { l: 0, r: 0, b: 0, t: 0 },
+    scene: {
+      xaxis: { title: 'Comp. 1', backgroundcolor: 'rgba(0,0,0,0)' },
+      yaxis: { title: 'Comp. 2', backgroundcolor: 'rgba(0,0,0,0)' },
+      zaxis: { title: 'Comp. 3', backgroundcolor: 'rgba(0,0,0,0)' }
+    }
+  });
+};
+</script>
+
+</body>
+</html>
