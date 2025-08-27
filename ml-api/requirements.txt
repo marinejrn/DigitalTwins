@@ -5,3 +5,4 @@ scikit-learn
 joblib
 sklearn.metrics
 flask_cors
+gunicorn
