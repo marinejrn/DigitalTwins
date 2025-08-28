@@ -7,8 +7,8 @@ from sklearn.metrics import pairwise_distances
 from scipy.spatial.distance import jensenshannon
 
 def load_data_from_csv():
-    df = pd.read_csv('model\df.csv')
-    return df
+    path = os.path.join("model", "df.csv")
+    return pd.read_csv(path)
 
 def project_and_cluster_with_patient(patient_dict):
     df = load_data_from_csv()
