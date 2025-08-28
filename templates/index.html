@@ -164,7 +164,6 @@
   <h1 class="app-title">Board4Care – Digital Twins</h1>
   <img src="/static/logo_gpt.png" alt="Logo" class="app-logo">
 </div>
-
 <div class="ecran">
   <div class="sidebar dashboard">
     <h2>Patient Profile</h2>
@@ -213,7 +212,7 @@ form.onsubmit = async (e) => {
   const json = Object.fromEntries(formData.entries());
   for (let key in json) json[key] = parseFloat(json[key]);
 
-  const res = await fetch("/predict", {
+  const res = await fetch("http://127.0.0.1:10000/predict", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(json),
